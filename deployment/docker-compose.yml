@@ -1,0 +1,70 @@
+
+
+version: '3.8'
+
+services:
+
+  publisher:
+    build:
+      context: ../TaskPublisher
+      dockerfile: build/Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  booker:
+    build:
+      context: ../TaskBooker
+      dockerfile: build/Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      publisher:
+        condition: service_started
+      db:
+        condition: service_healthy
+
+  db:
+    restart: always
+    image: postgres:17.0-alpine3.20
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - ACCESS_SECRET="Th3_B35t_4cc355"
+      - REFRESH_SECRET="Th3_B3st_R3fr35h"
+      - DB_USERNAME="db"
+      - DB_PASSWORD="db"
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  nats:
+    image: nats:2.10.7
+    command: "-js"
+    ports:
+      - "4222:4222"  # NATS клиентский порт
+      - "8222:8222"  # NATS мониторинг порт
+    volumes:
+      - ./nats/data:/data  # Для хранения данных JetStream
+
+  nats-nui:
+    image: ghcr.io/nats-nui/nui:0.5.1
+    container_name: nats-nui
+    environment:
+      NATS_URL: "nats://nats:4222"
+    ports:
+      - "31311:31311"  # Порт для доступа к NATS NUI
+    volumes:
+      - ./nui/db:/db  # Для хранения данных NUI
+    depends_on:
+      - nats
+
+
+volumes:
+  postgres_data:

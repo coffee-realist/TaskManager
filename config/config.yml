@@ -1,0 +1,10 @@
+db:
+  host: "db"
+  port: "5432"
+  dbname: "db"
+  SSLMode: "disable"
+
+nats:
+  host: "nats://localhost:4222"
+  streamName: "TASKS"
+  KVBucket:    "TASKS_INDEX"
