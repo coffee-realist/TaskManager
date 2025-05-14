@@ -1,9 +1,9 @@
 package storage
 
 import (
-	"TaskBooker/internal/domain/config"
 	"database/sql"
 	"fmt"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/domain/config"
 	"log"
 )
 

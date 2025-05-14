@@ -1,12 +1,13 @@
 package main
 
 import (
-	"TaskBooker/internal/api"
-	"TaskBooker/internal/broker"
-	"TaskBooker/internal/domain/config"
-	"TaskBooker/internal/domain/service"
-	"TaskBooker/internal/storage"
 	"context"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/api"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/broker"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/domain/config"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/domain/service"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/storage"
+	_ "github.com/lib/pq"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/spf13/viper"
@@ -16,6 +17,14 @@ import (
 	"time"
 )
 
+// @title Task Booker API
+// @version 1.0
+// @description API для управления задачами в микросервисе Booker
+// @host localhost:8000
+// @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
@@ -26,8 +35,8 @@ func main() {
 	db := storage.NewSqlConnection(config.DataBaseConfig{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
-		Username: os.Getenv("DB_USERNAME"),
-		Password: os.Getenv("DB_PASSWORD"),
+		Username: os.Getenv("POSTGRES_PASSWORD"),
+		Password: os.Getenv("POSTGRES_USER"),
 		Database: viper.GetString("db.dbname"),
 		SSLMode:  viper.GetString("db.SSLMode"),
 	})
@@ -47,8 +56,13 @@ func main() {
 		nc.Close()
 		log.Error("failed to create JetStream context: %w", err)
 	}
+	jsClient, err := nc.JetStream()
+	if err != nil {
+		nc.Close()
+		log.Error("failed to create JetStream client: %w", err)
+	}
 
-	natsBroker, err := broker.NewNatsBrokerService(js, nc, natsConfig)
+	natsBroker, err := broker.NewNatsBrokerService(js, jsClient, nc, natsConfig)
 	if err != nil {
 		nc.Close()
 		log.Error("failed to init NATS broker: %w", err)
@@ -62,7 +76,7 @@ func main() {
 
 	srv := new(api.Server)
 	go func() {
-		if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+		if err := srv.Run(viper.GetString("booker.port"), handlers.InitRoutes()); err != nil {
 			log.Error("Server failed to start", "error", err)
 		}
 	}()
@@ -80,7 +94,7 @@ func main() {
 }
 
 func initConfig() error {
-	viper.AddConfigPath("../config")
+	viper.AddConfigPath("./config")
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")
 

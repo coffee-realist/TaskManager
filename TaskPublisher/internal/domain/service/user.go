@@ -1,9 +1,9 @@
 package service
 
 import (
-	"TaskPublisher/internal/domain/dto"
-	"TaskPublisher/internal/storage"
 	"errors"
+	"github.com/coffee-realist/TaskManager/TaskPublisher/internal/domain/dto"
+	"github.com/coffee-realist/TaskManager/TaskPublisher/internal/storage"
 	"golang.org/x/crypto/bcrypt"
 )
 

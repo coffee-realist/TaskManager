@@ -1,5 +1,3 @@
-
-
 version: '3.8'
 
 services:
@@ -9,10 +7,18 @@ services:
       context: ../TaskPublisher
       dockerfile: build/Dockerfile
     ports:
-      - "8000:8000"
+      - "8080:8080"
+    environment:
+      - ACCESS_SECRET=Th3_B35t_4cc355
+      - REFRESH_SECRET=Th3_B3st_R3fr35h
+      - POSTGRES_PASSWORD=db
+      - POSTGRES_USER=db
+      - POSTGRES_DB=db
     depends_on:
       db:
         condition: service_healthy
+      nats:
+        condition: service_started
 
   booker:
     build:
@@ -20,11 +26,17 @@ services:
       dockerfile: build/Dockerfile
     ports:
       - "8000:8000"
+    environment:
+      - POSTGRES_PASSWORD=db
+      - POSTGRES_USER=db
+      - POSTGRES_DB=db
     depends_on:
       publisher:
         condition: service_started
       db:
         condition: service_healthy
+      nats:
+        condition: service_started
 
   db:
     restart: always
@@ -32,26 +44,27 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - ACCESS_SECRET="Th3_B35t_4cc355"
-      - REFRESH_SECRET="Th3_B3st_R3fr35h"
-      - DB_USERNAME="db"
-      - DB_PASSWORD="db"
+      - ACCESS_SECRET=Th3_B35t_4cc355
+      - REFRESH_SECRET=Th3_B3st_R3fr35h
+      - POSTGRES_PASSWORD=db
+      - POSTGRES_USER=db
+      - POSTGRES_DB=db
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U db"]
+      interval: 1s
       timeout: 5s
       retries: 10
 
   nats:
     image: nats:2.10.7
-    command: "-js"
-    ports:
-      - "4222:4222"  # NATS клиентский порт
-      - "8222:8222"  # NATS мониторинг порт
+    command: ["-js", "--store_dir", "/data/jetstream"]
     volumes:
-      - ./nats/data:/data  # Для хранения данных JetStream
+      - ./nats/data/jetstream:/data/jetstream
+    environment:
+      - NATS_JETSTREAM_STORE_DIR=/data/jetstream
+
 
   nats-nui:
     image: ghcr.io/nats-nui/nui:0.5.1
@@ -68,3 +81,5 @@ services:
 
 volumes:
   postgres_data:
+  nats:
+  nui:

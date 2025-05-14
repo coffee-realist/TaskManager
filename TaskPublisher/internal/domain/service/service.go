@@ -1,9 +1,9 @@
 package service
 
 import (
-	"TaskPublisher/internal/broker"
-	"TaskPublisher/internal/storage"
 	"database/sql"
+	"github.com/coffee-realist/TaskManager/TaskPublisher/internal/broker"
+	"github.com/coffee-realist/TaskManager/TaskPublisher/internal/storage"
 )
 
 type Service struct {

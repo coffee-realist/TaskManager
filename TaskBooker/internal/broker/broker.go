@@ -1,9 +1,9 @@
 package broker
 
 import (
-	"TaskBooker/internal/domain/config"
 	"context"
 	"fmt"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/domain/config"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"io"
@@ -18,6 +18,7 @@ type Interactor interface {
 
 type NatsBrokerService struct {
 	js       jetstream.JetStream
+	jsClient nats.JetStreamContext
 	natsConn *nats.Conn
 	config   config.NatsConfig
 	tasksKV  jetstream.KeyValue
@@ -25,6 +26,7 @@ type NatsBrokerService struct {
 
 func NewNatsBrokerService(
 	js jetstream.JetStream,
+	jsClient nats.JetStreamContext,
 	natsConn *nats.Conn,
 	cfg config.NatsConfig,
 ) (*NatsBrokerService, error) {
@@ -38,6 +40,7 @@ func NewNatsBrokerService(
 
 	return &NatsBrokerService{
 		js:       js,
+		jsClient: jsClient,
 		natsConn: natsConn,
 		config:   cfg,
 		tasksKV:  kv,

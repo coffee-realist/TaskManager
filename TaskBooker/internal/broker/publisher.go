@@ -1,10 +1,10 @@
 package broker
 
 import (
-	"TaskBooker/internal/storage/dto"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/storage/dto"
 )
 
 type Publisher interface {

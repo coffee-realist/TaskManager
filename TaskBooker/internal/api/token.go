@@ -1,11 +1,21 @@
 package api
 
 import (
-	"TaskBooker/internal/domain/dto"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/domain/dto"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
+// Refresh godoc
+// @Summary Обновление токена
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param input body dto.TokenReq true "Refresh token"
+// @Success 200 {object} dto.TokenResp
+// @Failure 400 {object} errorResponse
+// @Failure 401 {object} errorResponse
+// @Router /refresh [post]
 func (h *Handler) Refresh(c *gin.Context) {
 	var tokenReq dto.TokenReq
 	if err := c.ShouldBindJSON(&tokenReq); err != nil {

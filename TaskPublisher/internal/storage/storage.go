@@ -1,9 +1,9 @@
 package storage
 
 import (
-	"TaskPublisher/internal/domain/config"
 	"database/sql"
 	"fmt"
+	"github.com/coffee-realist/TaskManager/TaskPublisher/internal/domain/config"
 	"log"
 )
 
@@ -20,14 +20,12 @@ func NewSqlConnection(cfg config.DataBaseConfig) *sql.DB {
 
 type Storage struct {
 	UserStorage  UserStorageInteractor
-	TaskStorage  TaskStorageInteractor
 	TokenStorage TokenStorageInteractor
 }
 
 func NewStorage(db *sql.DB) *Storage {
 	return &Storage{
 		UserStorage:  NewUserStorage(db),
-		TaskStorage:  NewTaskStorage(db),
 		TokenStorage: NewTokenStorage(db),
 	}
 }

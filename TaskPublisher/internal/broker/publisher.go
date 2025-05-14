@@ -1,10 +1,10 @@
 package broker
 
 import (
-	"TaskPublisher/internal/domain/dto"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/coffee-realist/TaskManager/TaskPublisher/internal/domain/dto"
 )
 
 type Publisher interface {
@@ -23,7 +23,7 @@ func (n *NatsBrokerService) Publish(task dto.TaskResp) error {
 		return err
 	}
 
-	key := fmt.Sprintf("%s:%s", task.Project, task.Name)
+	key := fmt.Sprintf("%s.%s", task.Project, task.Name)
 	_, err = n.tasksKV.Put(context.Background(), key, []byte(fmt.Sprint(ack.Sequence)))
 	return err
 }

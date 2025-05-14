@@ -1,8 +1,8 @@
 package storage
 
 import (
-	"TaskPublisher/internal/storage/dto"
 	"database/sql"
+	"github.com/coffee-realist/TaskManager/TaskPublisher/internal/storage/dto"
 )
 
 type UserStorageInteractor interface {

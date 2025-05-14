@@ -1,13 +1,13 @@
 package broker
 
 import (
-	"TaskBooker/internal/domain/dto"
-	storageDTO "TaskBooker/internal/storage/dto"
 	"context"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/domain/dto"
+	storageDTO "github.com/coffee-realist/TaskManager/TaskBooker/internal/storage/dto"
 )
 
 type TaskBrokerInteractor interface {
-	GetAllByProject(taskReq dto.TaskReq, userID int) (<-chan dto.TaskResp, error)
+	GetAllByProject(ctx context.Context, taskReq dto.TaskReq) (<-chan dto.TaskResp, error)
 	PublishFinishedTask(task storageDTO.TaskResp) error
 	DeleteTask(task dto.TaskResp) error
 }
@@ -20,8 +20,8 @@ func NewTaskBroker(interactor Interactor) *TaskBroker {
 	return &TaskBroker{interactor: interactor}
 }
 
-func (t TaskBroker) GetAllByProject(taskReq dto.TaskReq, userID int) (<-chan dto.TaskResp, error) {
-	tasks, err := t.interactor.Subscribe(context.Background(), taskReq.Project, userID)
+func (t TaskBroker) GetAllByProject(ctx context.Context, taskReq dto.TaskReq) (<-chan dto.TaskResp, error) {
+	tasks, err := t.interactor.Subscribe(ctx, taskReq.Project)
 	if err != nil {
 		return nil, err
 	}

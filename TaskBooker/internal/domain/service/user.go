@@ -1,9 +1,9 @@
 package service
 
 import (
-	"TaskBooker/internal/domain/dto"
-	"TaskBooker/internal/storage"
 	"errors"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/domain/dto"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/storage"
 	"golang.org/x/crypto/bcrypt"
 )
 

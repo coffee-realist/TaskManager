@@ -16,7 +16,7 @@ type TaskResp struct {
 	Project         string    `json:"project" db:"project"`
 	Description     string    `json:"description" db:"description"`
 	Status          Status    `json:"status" db:"status"`
-	Publisher       int       `json:"publisher" db:"publisher"`
+	PublisherID     int       `json:"publisher_id" db:"publisher_id"`
 	BookedBy        int       `json:"booked_by" db:"booked_by"`
 	BookedAt        time.Time `json:"booked_at" db:"booked_at"`
 	StatusUpdatedAt time.Time `json:"status_updated_at" db:"status_updated_at"`

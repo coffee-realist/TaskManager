@@ -1,8 +1,9 @@
 package service
 
 import (
-	"TaskBooker/internal/storage"
 	"errors"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/storage"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/storage/dto"
 	"os"
 	"time"
 
@@ -42,6 +43,17 @@ func (t *TokenService) Create(userID int) (string, string, error) {
 	}
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	refreshTokenString, err := refreshToken.SignedString([]byte(os.Getenv("REFRESH_SECRET")))
+	if err != nil {
+		return "", "", err
+	}
+
+	err = t.storage.Insert(
+		dto.TokenReq{
+			UserID:    userID,
+			Token:     refreshTokenString,
+			ExpiresAt: time.Now().Add(time.Hour * 24),
+		},
+	)
 	if err != nil {
 		return "", "", err
 	}

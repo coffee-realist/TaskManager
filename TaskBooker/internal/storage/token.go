@@ -1,10 +1,10 @@
 package storage
 
 import (
-	storageDTO "TaskBooker/internal/storage/dto"
 	"context"
 	"database/sql"
 	"errors"
+	storageDTO "github.com/coffee-realist/TaskManager/TaskBooker/internal/storage/dto"
 )
 
 type TokenStorageInteractor interface {

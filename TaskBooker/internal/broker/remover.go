@@ -1,9 +1,9 @@
 package broker
 
 import (
-	"TaskBooker/internal/domain/dto"
 	"context"
 	"fmt"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/domain/dto"
 	"log/slog"
 	"strconv"
 )
@@ -13,7 +13,7 @@ type Remover interface {
 }
 
 func (n *NatsBrokerService) Remove(task dto.TaskResp) error {
-	key := fmt.Sprintf("%s:%s", task.Project, task.Name)
+	key := fmt.Sprintf("%s.%s", task.Project, task.Name)
 	entry, err := n.tasksKV.Get(context.Background(), key)
 	if err != nil {
 		return fmt.Errorf("task index not found: %w", err)

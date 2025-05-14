@@ -1,11 +1,22 @@
 package api
 
 import (
-	"TaskBooker/internal/domain/dto"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/domain/dto"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
+// Login godoc
+// @Summary Вход в систему
+// @Description Авторизация пользователя и получение токенов
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param input body dto.LoginReq true "Данные для входа"
+// @Success 200 {object} dto.TokenResp
+// @Failure 400 {object} errorResponse{message=string}
+// @Failure 500 {object} errorResponse{message=string}
+// @Router /login [post]
 func (h *Handler) Login(c *gin.Context) {
 	var loginReq dto.LoginReq
 
@@ -32,6 +43,17 @@ func (h *Handler) Login(c *gin.Context) {
 	})
 }
 
+// Logout godoc
+// @Summary Выход из системы
+// @Description Завершение сессии пользователя
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 401 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Security BearerAuth
+// @Router /logout [post]
 func (h *Handler) Logout(c *gin.Context) {
 	userID := getUserIDFromContext(c)
 	if userID == 0 {

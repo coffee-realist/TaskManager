@@ -1,15 +1,15 @@
 package storage
 
 import (
-	"TaskBooker/internal/domain/dto"
-	storageDTO "TaskBooker/internal/storage/dto"
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/domain/dto"
+	storageDTO "github.com/coffee-realist/TaskManager/TaskBooker/internal/storage/dto"
 )
 
 type TaskStorageInteractor interface {
-	Insert(task dto.TaskResp, userID int) error
+	Insert(task dto.TaskResp, userID int) (int, error)
 	UpdateStatus(taskPatch dto.TaskPatch) error
 	Delete(id int) (storageDTO.TaskResp, error)
 }
@@ -22,22 +22,21 @@ func NewTaskStorage(db *sql.DB) *TaskStorage {
 	return &TaskStorage{db: db}
 }
 
-func (s *TaskStorage) Insert(task dto.TaskResp, userID int) error {
-	query := `INSERT INTO tasks (name, project, description, status, publisher, 
-                  bookedBy, bookedAt, StatusUpdatedAt) 
+func (s *TaskStorage) Insert(task dto.TaskResp, userID int) (int, error) {
+	query := `INSERT INTO tasks (name, project, description, status, publisher_id, 
+                  booked_by, booked_at, status_updated_at) 
 				VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-				ON CONFLICT (name, project) DO NOTHING
 				RETURNING id`
 	var taskID int
 	err := s.db.QueryRow(query, task.Name, task.Project, task.Description,
 		task.Status, task.PublisherID, userID).Scan(&taskID)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	if taskID == 0 {
-		return errors.New("task is already booked")
+		return 0, errors.New("task is already booked")
 	}
-	return nil
+	return taskID, nil
 }
 
 func (s *TaskStorage) UpdateStatus(taskPatch dto.TaskPatch) error {
@@ -53,12 +52,12 @@ func (s *TaskStorage) Delete(id int) (storageDTO.TaskResp, error) {
 	query := `
         DELETE FROM tasks 
         WHERE id = $1
-        RETURNING id, name, project, description, status, publisher, 
-                  bookedBy, bookedAt, StatusUpdatedAt`
+        RETURNING id, name, project, description, status, publisher_id, 
+                  booked_by, booked_at, status_updated_at`
 	var task storageDTO.TaskResp
 	err := s.db.QueryRow(query, id).Scan(
 		&task.ID, &task.Name, &task.Project, &task.Description, &task.Status,
-		&task.Publisher, &task.BookedBy, &task.BookedAt, &task.StatusUpdatedAt,
+		&task.PublisherID, &task.BookedBy, &task.BookedAt, &task.StatusUpdatedAt,
 	)
 
 	if err != nil {

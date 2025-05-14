@@ -1,8 +1,8 @@
 package storage
 
 import (
-	"TaskBooker/internal/storage/dto"
 	"database/sql"
+	"github.com/coffee-realist/TaskManager/TaskBooker/internal/storage/dto"
 )
 
 type UserStorageInteractor interface {

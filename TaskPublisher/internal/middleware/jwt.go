@@ -34,11 +34,21 @@ func AuthMiddleWare() gin.HandlerFunc {
 
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			return
 		}
 
-		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-			c.Set("user_id", claims.UserID)
-			c.Next()
+		if !token.Valid {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "token is invalid"})
+			return
 		}
+
+		claims, ok := token.Claims.(*Claims)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token claims"})
+			return
+		}
+
+		c.Set("userID", claims.UserID)
+		c.Next()
 	}
 }

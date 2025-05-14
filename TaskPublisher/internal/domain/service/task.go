@@ -1,13 +1,14 @@
 package service
 
 import (
-	"TaskPublisher/internal/broker"
-	"TaskPublisher/internal/domain/dto"
-	storageDTO "TaskPublisher/internal/storage/dto"
+	"context"
+	"github.com/coffee-realist/TaskManager/TaskPublisher/internal/broker"
+	"github.com/coffee-realist/TaskManager/TaskPublisher/internal/domain/dto"
+	storageDTO "github.com/coffee-realist/TaskManager/TaskPublisher/internal/storage/dto"
 )
 
 type TaskInteractor interface {
-	GetAllFinishedByProject(taskReq dto.TaskReq, userID int) (<-chan storageDTO.TaskResp, error)
+	GetAllFinishedByProject(ctx context.Context, taskReq dto.TaskReq) (<-chan storageDTO.TaskResp, error)
 	Publish(task dto.TaskResp) error
 }
 
@@ -19,8 +20,8 @@ func NewTaskService(broker broker.TaskBrokerInteractor) *TaskService {
 	return &TaskService{broker: broker}
 }
 
-func (s *TaskService) GetAllFinishedByProject(taskReq dto.TaskReq, userID int) (<-chan storageDTO.TaskResp, error) {
-	tasks, err := s.broker.GetAllFinishedByProject(taskReq, userID)
+func (s *TaskService) GetAllFinishedByProject(ctx context.Context, taskReq dto.TaskReq) (<-chan storageDTO.TaskResp, error) {
+	tasks, err := s.broker.GetAllFinishedByProject(ctx, taskReq)
 	if err != nil {
 		return nil, err
 	}
