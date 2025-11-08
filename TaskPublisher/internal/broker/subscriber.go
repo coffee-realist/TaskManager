@@ -22,7 +22,7 @@ func (n *NatsBrokerService) Subscribe(ctx context.Context, project string) (<-ch
 		func(msg *nats.Msg) {
 			var task dto.TaskResp
 			if err := json.Unmarshal(msg.Data, &task); err != nil {
-				slog.Error("unmarshal failed: %v", err)
+				slog.Error("unmarshal failed", "err", err)
 				return
 			}
 			select {
@@ -42,9 +42,9 @@ func (n *NatsBrokerService) Subscribe(ctx context.Context, project string) (<-ch
 		<-ctx.Done()
 
 		if err := sub.Unsubscribe(); err != nil {
-			slog.Error("Failed to unsubscribe: %v", err)
+			slog.Error("Failed to unsubscribe", "err", err)
 		} else {
-			slog.Info("Ephemeral consumer unsubscribed: %s", subject)
+			slog.Info("Ephemeral consumer unsubscribed", "subject", subject)
 		}
 
 		close(out)
