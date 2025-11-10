@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+
+  publisher:
+    build:
+      context: ../TaskPublisher
+      dockerfile: build/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ACCESS_SECRET=Th3_B35t_4cc355
+      - REFRESH_SECRET=Th3_B3st_R3fr35h
+      - POSTGRES_PASSWORD=db
+      - POSTGRES_USER=db
+      - POSTGRES_DB=db
+    depends_on:
+      db:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  booker:
+    build:
+      context: ../TaskBooker
+      dockerfile: build/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_PASSWORD=db
+      - POSTGRES_USER=db
+      - POSTGRES_DB=db
+    depends_on:
+      publisher:
+        condition: service_started
+      db:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  db:
+    restart: always
+    image: postgres:17.0-alpine3.20
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - ACCESS_SECRET=Th3_B35t_4cc355
+      - REFRESH_SECRET=Th3_B3st_R3fr35h
+      - POSTGRES_PASSWORD=db
+      - POSTGRES_USER=db
+      - POSTGRES_DB=db
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U db"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  nats:
+    image: nats:2.10.7
+    command: ["-js", "--store_dir", "/data/jetstream"]
+    volumes:
+      - ./nats/data/jetstream:/data/jetstream
+    environment:
+      - NATS_JETSTREAM_STORE_DIR=/data/jetstream
+
+
+  nats-nui:
+    image: ghcr.io/nats-nui/nui:0.5.1
+    container_name: nats-nui
+    environment:
+      NATS_URL: "nats://nats:4222"
+    ports:
+      - "31311:31311"  # Порт для доступа к NATS NUI
+    volumes:
+      - ./nui/db:/db  # Для хранения данных NUI
+    depends_on:
+      - nats
+
+
+volumes:
+  postgres_data:
+  nats:
+  nui:

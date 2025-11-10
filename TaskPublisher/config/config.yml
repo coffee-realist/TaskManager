@@ -1,0 +1,16 @@
+publisher:
+  port: 8080
+
+booker:
+  port: 8000
+
+db:
+  host: "db"
+  port: "5432"
+  dbname: "db"
+  SSLMode: "disable"
+
+nats:
+  host: "nats://nats:4222"
+  streamName: "TASKS"
+  KVBucket:    "TASKS_INDEX"

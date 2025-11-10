@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: publisher
+  namespace: task-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: publisher
+  template:
+    metadata:
+      labels:
+        app: publisher
+    spec:
+      initContainers:
+      - name: wait-for-postgres
+        image: postgres:17.0-alpine3.20
+        command: ['sh', '-c', 'until pg_isready -h postgres -p 5432; do echo "Waiting for PostgreSQL..."; sleep 2; done']
+      - name: wait-for-nats
+        image: busybox:1.35
+        command: ['sh', '-c', 'until nc -z nats 4222; do echo "Waiting for NATS..."; sleep 2; done']
+      containers:
+      - name: publisher
+        image: cr86/task-publisher:latest
+        env:
+        - name: ACCESS_SECRET
+          value: "Th3_B35t_4cc355"
+        - name: REFRESH_SECRET
+          value: "Th3_B3st_R3fr35h"
+        - name: POSTGRES_PASSWORD
+          value: "db"
+        - name: POSTGRES_USER
+          value: "db"
+        - name: POSTGRES_DB
+          value: "db"
+        - name: POSTGRES_HOST
+          value: "postgres"
+        - name: NATS_URL
+          value: "nats://nats:4222"
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: publisher
+  namespace: task-app
+spec:
+  type: NodePort
+  selector:
+    app: publisher
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30080
